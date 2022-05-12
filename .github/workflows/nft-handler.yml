@@ -7,6 +7,11 @@ on:
     path:
       - "whitelist/nft.csv"
 
+env:
+  SPARK_DATABASE: ${{ secrets.SPARK_DATABASE }}
+  SPARK_STS_HOST: ${{ secrets.SPARK_STS_HOST }}
+  SPARK_STS_PORT: ${{ secrets.SPARK_STS_PORT }}
+
 jobs:
   sync-added-nft-token-metadata:
     runs-on: self-hosted
