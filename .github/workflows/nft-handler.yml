@@ -60,7 +60,7 @@ jobs:
       - name: Get added NFT metadata
         run: |
           bdbt export_added_nft_metadata \
-          --api-keys ${{ secrets.MORALIS_API_KEYS}} \
+          --api-keys ${{ secrets.MORALIS_API_KEYS }} \
           --contract-address ${{ step.get-added-contract-address.outputs.version }} \
           --output-prefix "nft-metadata-${{ github.sha }}"
 
