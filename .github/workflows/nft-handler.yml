@@ -37,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      
+
       - name: Upload NFT token csv to s3
         uses: zdurham/s3-upload-github-action@master
         env:
@@ -60,7 +60,7 @@ jobs:
       - name: Get added NFT metadata
         run: |
           bdbt export_added_nft_metadata \
-          --api-keys ${{ secrets.MORALIS_API_KEYS}} \
+          --api-keys ${{ secrets.MORALIS_API_KEYS }} \
           --contract-address ${{ step.get-added-contract-address.outputs.version }} \
           --output-prefix "nft-metadata-${{ github.sha }}"
 
@@ -82,4 +82,4 @@ jobs:
       - name: Refresh dbt external table
         uses: mwhitaker/dbt-action@master
         with:
-          dbt_command: "dbt run-operation stage_external_sources --vars "ext_full_refresh: true""
+          dbt_command: "dbt run-operation stage_external_sources --vars 'ext_full_refresh: true'"
