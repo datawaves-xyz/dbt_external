@@ -3,7 +3,7 @@ name: NFT-handler
 on:
   push:
     branches:
-      - "main"
+      - "master"
     path:
       - "whitelist/nft.csv"
 
