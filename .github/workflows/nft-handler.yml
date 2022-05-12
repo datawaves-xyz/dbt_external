@@ -1,0 +1,80 @@
+name: NFT-handler
+
+on:
+  push:
+    branches:
+      - "main"
+    path:
+      - "whitelist/nft.csv"
+
+jobs:
+  sync-added-nft-token-metadata:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache python pip
+        uses: actions/cache@v2
+        id: cache-pip
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: Upload NFT token csv to s3
+        uses: zdurham/s3-upload-github-action@master
+        env:
+          FILE: whitelist/nft.csv
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          S3_KEY: ${{ secrets.AWS_S3_PREFIX }}/nft_tokens/nft_tokens.csv
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade git+https://github.com/datawaves-xyz/blockchain-dbt.git@master
+
+      - name: Get added contract address
+        id: get-added-contract-address
+        run: |
+          echo ::set-output name=address::$(git diff --diff-filter=A HEAD~1 whitelist/nft.csv | grep ^+ | grep -v ++ | sed -e 's|+||' | cut -d, -f1 | tr '\n' ',')
+
+      - name: Get added NFT metadata
+        run: |
+          bdbt export_added_nft_metadata \
+          --api-keys ${{ secrets.MORALIS_API_KEYS}} \
+          --contract-address ${{ step.get-added-contract-address.outputs.version }} \
+          --output-prefix "nft-metadata-${{ github.sha }}"
+
+      - name: Upload csv to s3
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "tmp"
+          DEST_DIR: ${{ secrets.AWS_S3_PREFIX }}/nft_token_metadata
+
+      - name: Install deps
+        uses: mwhitaker/dbt-action@master
+        with:
+          dbt_command: "dbt deps --profiles-dir profile"
+
+      - name: Refresh dbt external table
+        uses: mwhitaker/dbt-action@master
+        with:
+          dbt_command: "dbt run-operation stage_external_sources --vars "ext_full_refresh: true""

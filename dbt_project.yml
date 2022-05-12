@@ -1,0 +1,5 @@
+config-version: 2
+
+name: "external"
+version: "0.0.1"
+profile: "dbt_external"
