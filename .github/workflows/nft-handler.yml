@@ -61,7 +61,7 @@ jobs:
         run: |
           bdbt export_added_nft_metadata \
           --api-keys ${{ secrets.MORALIS_API_KEYS }} \
-          --contract-address ${{ step.get-added-contract-address.outputs.address }} \
+          --contract-address ${{ steps.get-added-contract-address.outputs.address }} \
           --output-prefix "nft-metadata-${{ github.sha }}"
 
       - name: Upload csv to s3
