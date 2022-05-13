@@ -57,7 +57,7 @@ jobs:
       - name: Get added contract address
         id: get-added-contract-address
         run: |
-          echo ::set-output name=address::$(git diff --diff-filter=A HEAD~1 whitelist/nft.csv | grep ^+ | grep -v ++ | sed -e 's|+||' | cut -d, -f1 | tr '\n' ',')
+          echo ::set-output name=address::$(git diff HEAD~1 whitelist/nft.csv | grep ^+ | grep -v ++ | sed -e 's|+||' | cut -d, -f1 | tr '\n' ',')
 
       - name: Get added NFT metadata
         run: |
