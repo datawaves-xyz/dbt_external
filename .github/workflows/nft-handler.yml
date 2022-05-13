@@ -76,7 +76,12 @@ jobs:
           SOURCE_DIR: "tmp"
           DEST_DIR: ${{ secrets.AWS_S3_PREFIX }}/nft_token_metadata
 
-      - name: Install deps and refresh dbt external table
+      - name: Install deps
         uses: mwhitaker/dbt-action@master
         with:
-          dbt_command: "dbt deps --profiles-dir profile && dbt run-operation --profiles-dir profile stage_external_sources --args 'select: ethereum_nft_metadata'"
+          dbt_command: "dbt deps --profiles-dir profile"
+
+      - name: Refresh dbt external table
+        uses: mwhitaker/dbt-action@master
+        with:
+          dbt_command: 'dbt run-operation --profiles-dir profile stage_external_sources --args "select: ethereum_nft_metadata"'
