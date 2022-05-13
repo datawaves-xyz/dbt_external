@@ -59,29 +59,31 @@ jobs:
         run: |
           echo ::set-output name=address::$(git diff HEAD~1 whitelist/nft.csv | grep ^+ | grep -v ++ | sed -e 's|+||' | cut -d, -f1 | tr '\n' ',')
 
-#       - name: Get added NFT metadata
-#         run: |
-#           bdbt export_added_nft_metadata \
-#           --api-keys ${{ secrets.MORALIS_API_KEYS }} \
-#           --contract-address ${{ steps.get-added-contract-address.outputs.address }} \
-#           --output-prefix "nft-metadata-${{ github.sha }}"
+      - name: Get added NFT metadata
+        run: |
+          bdbt export_added_nft_metadata \
+          --api-keys ${{ secrets.MORALIS_API_KEYS }} \
+          --contract-address ${{ steps.get-added-contract-address.outputs.address }} \
+          --output-prefix "nft-metadata-${{ github.sha }}"
 
-#       - name: Upload csv to s3
-#         uses: jakejarvis/s3-sync-action@master
-#         env:
-#           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-#           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           AWS_REGION: ${{ secrets.AWS_REGION }}
-#           SOURCE_DIR: "tmp"
-#           DEST_DIR: ${{ secrets.AWS_S3_PREFIX }}/nft_token_metadata
+      - name: Upload csv to s3
+        uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "tmp"
+          DEST_DIR: ${{ secrets.AWS_S3_PREFIX }}/nft_token_metadata
 
-      - name: Install deps
-        uses: mwhitaker/dbt-action@master
-        with:
-          dbt_command: "dbt deps --profiles-dir profile"
+      # TODO: wait for the PR(https://github.com/mwhitaker/dbt-action/pull/35) merge to master
+      #
+      # - name: Install deps
+      #   uses: mwhitaker/dbt-action@master
+      #   with:
+      #     dbt_command: "dbt deps --profiles-dir profile"
 
-      - name: Refresh dbt external table
-        uses: mwhitaker/dbt-action@master
-        with:
-          dbt_command: "sleep 1000"
+      # - name: Refresh dbt external table
+      #   uses: mwhitaker/dbt-action@master
+      #   with:
+      #     dbt_command: "dbt --debug run-operation --profiles-dir profile stage_external_sources"
