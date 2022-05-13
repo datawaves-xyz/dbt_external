@@ -84,4 +84,4 @@ jobs:
       - name: Refresh dbt external table
         uses: mwhitaker/dbt-action@master
         with:
-          dbt_command: "dbt run-operation --profiles-dir profile stage_external_sources"
+          dbt_command: "dbt --debug run-operation --profiles-dir profile stage_external_sources"
