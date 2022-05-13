@@ -84,4 +84,4 @@ jobs:
       - name: Refresh dbt external table
         uses: mwhitaker/dbt-action@master
         with:
-          dbt_command: "dbt run-operation stage_external_sources --vars 'ext_full_refresh: true'"
+          dbt_command: "dbt run-operation --profiles-dir profile stage_external_sources --args 'select: ethereum_nft_metadata'"
